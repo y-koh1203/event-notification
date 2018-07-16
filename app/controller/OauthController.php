@@ -10,7 +10,6 @@
 
             $this->dotenv = new Dotenv\Dotenv('/Applications/XAMPP/xamppfiles/htdocs/event-notification/');
             $this->dotenv->load();
-
         }
         
         public function index (){
@@ -46,6 +45,35 @@
         }
 
         public function twiiterCallback(){
-            echo $this->twig->render('search_connpass.html');
+            if(!isset($_SESSION)){
+                session_start();
+            }
+
+            $consumerKey       = $_ENV['TWITTER_API_KEY'];
+            $consumerSecret    = $_ENV['TWITTER_API_SECRET'];
+
+            $request_token['oauth_token'] = $_SESSION['oauth_token'];
+            $request_token['oauth_token_secret'] = $_SESSION['oauth_token_secret'];
+
+            //Twitterから返されたOAuthトークンと、あらかじめlogin.phpで入れておいたセッション上のものと一致するかをチェック
+            // if (isset($_REQUEST['oauth_token']) && $request_token['oauth_token'] !== $_REQUEST['oauth_token']) {
+            //     die( 'Error!' );
+            // }
+
+            //OAuth トークンも用いて TwitterOAuth をインスタンス化
+            $connection = new TwitterOAuth($consumerKey, $consumerSecret, $request_token['oauth_token'], $request_token['oauth_token_secret']);
+
+            //アプリでは、access_token(配列になっています)をうまく使って、Twitter上のアカウントを操作していきます
+            $_SESSION['access_token'] = $connection->oauth("oauth/access_token", array("oauth_verifier" => $_REQUEST['oauth_verifier']));
+            /*
+            ちなみに、この変数の中に、OAuthトークンとトークンシークレットが配列となって入っています。
+            */
+
+            //セッションIDをリジェネレート
+            //session_regenerate_id();
+
+            //セッションIDをリジェネレート
+            header( 'location: /search');
+            //echo $this->twig->render('search_connpass.html');
         }
     }

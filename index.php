@@ -2,6 +2,7 @@
     require './vendor/autoload.php';
     require './app/controller/OauthController.php';
     require './app/controller/UtilController.php';
+    require './app/controller/SearchController.php';
 
     route();
 
@@ -20,6 +21,8 @@
             $r->addRoute('GET', '/', 'welcome');
             $r->addRoute('GET', '/twitter', 'auth');
             $r->addRoute('GET', '/twitter/callback', 'callback');
+            $r->addRoute('GET', '/search', 'search_index');
+            $r->addRoute('GET', '/search/{nickname:\d+}', 'search');
         });
 
         // リクエストパラメータを取得
@@ -84,5 +87,11 @@
             case "callback":
                 $oauth_index = new OauthController;
                 $oauth_index->twiiterCallback();
+            case "search_index":
+                $search_index = new SearchController;
+                $search_index->returnSearchIndex();
+            case "search":
+                $search_index = new SearchController;
+                $search_index->getConnpassUser($vars);
         }
     }

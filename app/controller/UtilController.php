@@ -9,11 +9,6 @@
         }
         
         public function nf (){
-            $data = [];
-            $data = [
-                'name' => 'yamaymaa',
-            ];
-
-            echo $this->twig->render('404.html', $data);
+            echo $this->twig->render('404.html');
         }
     }
