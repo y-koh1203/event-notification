@@ -3,6 +3,7 @@
     require './app/controller/OauthController.php';
     require './app/controller/UtilController.php';
     require './app/controller/SearchController.php';
+    require './app/controller/DetailController.php';
 
     route();
 
@@ -22,7 +23,10 @@
             $r->addRoute('GET', '/twitter', 'auth');
             $r->addRoute('GET', '/twitter/callback', 'callback');
             $r->addRoute('GET', '/search', 'search_index');
-            $r->addRoute('GET', '/search/{nickname:\d+}', 'search');
+            $r->addRoute('GET', '/search/user', 'search_user');
+            $r->addRoute('GET', '/detail', 'detail');
+            $r->addRoute('POST', '/detail/set_notice', 'set_notice');
+            $r->addRoute('GET', '/error', 'error');
         });
 
         // リクエストパラメータを取得
@@ -90,8 +94,17 @@
             case "search_index":
                 $search_index = new SearchController;
                 $search_index->returnSearchIndex();
-            case "search":
+            case "search_user":
                 $search_index = new SearchController;
-                $search_index->getConnpassUser($vars);
+                $search_index->getConnpassUser();
+            case "detail":
+                $detail_index = new DetailController;
+                $detail_index->detailIndex();
+            case "set_notice":
+                $detail_index = new DetailController;
+                $detail_index->setNotice();
+            case "error":
+                $error_index = new UtilController();
+                $error_index->error();
         }
     }

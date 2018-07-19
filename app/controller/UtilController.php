@@ -10,5 +10,17 @@
         
         public function nf (){
             echo $this->twig->render('404.html');
+            exit();
+        }
+
+        public function error(){
+            session_start();
+            $msg = $_SESSION['err'];
+            $data = [
+                'msg' => $msg
+            ];
+            echo $this->twig->render('error.html',$data);
+            $_SESSION = [];
+            exit();
         }
     }
