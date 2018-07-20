@@ -1,6 +1,6 @@
 <?php
     require '/Applications/XAMPP/xamppfiles/htdocs/event-notification/vendor/autoload.php';
-    // require '/Applications/XAMPP/xamppfiles/htdocs/event-notification/app/helper/api.php';
+    //require '/Applications/XAMPP/xamppfiles/htdocs/event-notification/app/database.php';
 
     use Abraham\TwitterOAuth\TwitterOAuth;
 
@@ -12,6 +12,8 @@
 
             $this->dotenv = new Dotenv\Dotenv('/Applications/XAMPP/xamppfiles/htdocs/event-notification/');
             $this->dotenv->load();
+
+            //$this->pdo = new database();
         }
 
         // 検索画面TOPの表示
@@ -110,11 +112,30 @@
                 'test' => 'yamaymaa',
                 'count' => $tmp_events['results_returned'],
                 'events' => $events,
-                'user' => $user
             ];
 
             echo $this->twig->render('search_result.html', $data);
             die();
         }
+
+        // public function getAllmyNotice(){
+        //     //セッションからアクセストークンを取得
+        //     $access_token = $_SESSION['access_token'];
+
+        //     try{
+        //         //OAuthトークンとシークレットも使って TwitterOAuth をインスタンス化
+        //         $connection = new TwitterOAuth($_ENV['TWITTER_API_KEY'], $_ENV['TWITTER_API_SECRET'], $access_token['oauth_token'], $access_token['oauth_token_secret']);
+        //     }catch(Exception $e){
+        //         $_SESSION['err'] = '認証に失敗しました。';
+        //         header('Location: /error');
+        //         exit();
+        //     }
+
+        //     //Twitter APIから、ユーザー情報を取得
+        //     $user = $connection->get("account/verify_credentials");
+
+        //     $query = "select * from reminder where screen_name = {$user->screen_name} ;";
+        //     $res = $this->pdo->select();
+        // }
     }
         

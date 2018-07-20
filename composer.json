@@ -6,6 +6,7 @@
         "abraham/twitteroauth": "^0.9.2",
         "twig/twig": "^2.4",
         "josegonzalez/dotenv": "^3.2",
-        "vlucas/phpdotenv": "^2.5"
+        "vlucas/phpdotenv": "^2.5",
+        "zurb/foundation": "^6.4"
     }
 }

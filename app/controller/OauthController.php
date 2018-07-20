@@ -24,6 +24,7 @@
 
         public function twiiterOAuth(){
             session_start();
+            $_SESSION = [];
             $consumerKey       = $_ENV['TWITTER_API_KEY'];
             $consumerSecret    = $_ENV['TWITTER_API_SECRET'];
 
@@ -32,6 +33,7 @@
             try{
                 //OAuthトークンとシークレットも使って TwitterOAuth をインスタンス化
                 $connection = new TwitterOAuth($consumerKey, $consumerSecret);
+
             }catch(Exception $e){
                 $_SESSION['err'] = '認証に失敗しました。';
                 header('Location: /error');
@@ -41,7 +43,6 @@
             $token = $connection->oauth('oauth/request_token', array(
                 'oauth_callback' => 'http://127.0.0.1:8000/twitter/callback'
             ));
-
 
             $_SESSION = array();
             $_SESSION['oauth_token'] = $token['oauth_token'];
@@ -90,9 +91,9 @@
                 header('Location: /error');
                 exit();
             }
-           
-            $_SESSION['auth'] = true;
 
+            $_SESSION['auth'] = true;
+            
             header( 'location: /search');
             exit();
             //echo $this->twig->render('search_connpass.html');
