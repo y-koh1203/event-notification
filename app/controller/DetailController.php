@@ -31,7 +31,9 @@
             }
 
             $_SESSION['event'] = [];
+            $nickname = $_SESSION['nickname'];
             $event_id = $_GET['event_id'];
+            $user = $_SESSION['user'];
 
             //file_get_contents用のユーザーエージェント
             $ua = $_SERVER['HTTP_USER_AGENT'];
@@ -55,7 +57,9 @@
             $_SESSION['event'] = $event['events'][0];
 
             $data = [
-                'event' => $event['events'][0]
+                'event' => $event['events'][0],
+                'nickname' => $nickname,
+                'user' => $user->screen_name
             ];
 
             echo $this->twig->render('event_detail.html',$data);
@@ -67,6 +71,8 @@
 
             $event = $_SESSION['event'];
             $notice_date = $_POST['notice_date'];
+            $nickname = $_SESSION['nickname'];
+            $msg = "";
 
             //セッションからアクセストークンを取得
             $access_token = $_SESSION['access_token'];
@@ -83,14 +89,29 @@
             //Twitter APIから、ユーザー情報を取得
             $user = $connection->get("account/verify_credentials");
 
-            $res = $this->pdo->insert(
-                'reminder',
-                ['event_id','screen_name','event_name','date','url','notice_date','end'],
-                [$event['event_id'],$user->screen_name,$event['title'],strtotime($event['started_at']),$event['event_url'],$notice_date,0]
+            //重複リマインドの検出
+            $select_res = $this->pdo->select(
+                "select * from reminder where event_id = {$event['event_id']} and screen_name = \"{$user->screen_name}\" and notice_date = {$notice_date} and end = 0 ;"
             );
-            
+
+            //重複に該当しない場合のみinsert
+            if(!count($select_res) > 0){
+                $res = $this->pdo->insert(
+                    'reminder',
+                    ['event_id','screen_name','event_name','date','url','notice_date','end'],
+                    [$event['event_id'],$user->screen_name,$event['title'],strtotime($event['started_at']),$event['event_url'],$notice_date,0]
+                );
+            }else{
+                $res = false;
+                $msg = 'そのリマインドは登録済みです。';
+            }
+
             $data = [
-                'res' => $res
+                'res' => $res,
+                'event_id' => $event['event_id'],
+                'nickname' => $nickname,
+                'message' => $msg,
+                'user' => $user->screen_name
             ];
 
             echo $this->twig->render('result.html',$data);

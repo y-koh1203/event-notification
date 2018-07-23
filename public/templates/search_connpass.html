@@ -20,20 +20,54 @@
       $(document).foundation();
     })
 </script>
+
+<style>
+
+    #search_wrap{
+        margin: 30vh auto 0 auto;
+    }
+
+    #search_bar{
+        width: 40%;
+    }
+
+    .centering{
+        text-align: center;
+    }
+
+    .box_centering{
+        margin: 0 auto;
+    }
+
+    #button_wrap{
+        margin-top:2%;
+    }
+    
+</style>
 <body>
     <div class="top-bar">
         <div class="top-bar-left">
             <ul class="dropdown menu" data-dropdown-menu>
-            <li class="menu-text">Connpass Event Reminder</li>
+                <li class="menu-text"><a href="/search">Connpass Event Reminder</a></li>
             </ul>
         </div>
         <div class="top-bar-right">
-    
+            <ul class="dropdown menu" data-dropdown-menu>
+                <li class="menu-text"><a href="/search/all_notice?user={{user}}">{{user}}</a></li>
+            </ul>
         </div>
     </div>
+
     <form action="/search/user" method="get">
-        <input type="text" name="nickname" id="">nickname<br>
-        <button type="submit">検索</button>
+        <div id="search_wrap">
+            <p class="centering">ニックネームを入力して検索</p>
+            <div class="centering"><input type="text" name="nickname" id="search_bar" class="box_centering"></div>
+        </div>
+       
+        <div class="centering" id="button_wrap">
+            <button type="submit" class="button">検索</button>
+        </div>
+        
     </form>
 </body>
 </html>

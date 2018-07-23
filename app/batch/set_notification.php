@@ -12,7 +12,7 @@
 
     //Twitter OAuth インスタンスを生成
     $connection = new TwitterOAuth($_ENV['TWITTER_API_KEY'],$_ENV['TWITTER_API_SECRET'],$_ENV['MY_ACCESS_TOKEN'],$_ENV['MY_ACCESS_TOKEN_SECRET']);
-
+    var_dump($_ENV['TWITTER_API_KEY'],$_ENV['TWITTER_API_SECRET'],$_ENV['MY_ACCESS_TOKEN'],$_ENV['MY_ACCESS_TOKEN_SECRET']);
     $now = time();
 
     // DBからイベントを取り出す際に、指定日時の分UNIXTIMEを減算する
@@ -38,7 +38,7 @@
                 array(
                     "status" => "@{$notice['screen_name']}  
 イベント、{$notice['event_name']}の{$notice['notice_date']}日前です! 
-URL: https://{$notice['url']}"
+{$notice['url']}"
                 )
             );
         }

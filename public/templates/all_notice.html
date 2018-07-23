@@ -56,41 +56,34 @@
             </ul>
         </div>
     </div>
-    <div id="wrap">
-        <form action="/detail/set_notice" method="post">
-            <div>
+    <div id="wrap">    
+        {% if notice | length > 0 %}
+            {% for item in notice %}
+            <form action="/search/del_notice" method="post">
                 <div class="card">
                     <div class="card-divider">
-                        <h3>{{event.title}}</h3>
-                    </div>  
-
-                    <div class="container">
-                        <h4>イベントオーナー</h4>
-                        <p>・{{event.owner_nickname}}</p>
-                        <h4>イベントURL</h4>
-                        <p>・<a href="{{event.event_url}}">{{event.event_url}}</a></p>
-                        <h4>開催日</h4>
-                        <p>・{{event.started_at}}</p>
-                        <input type="hidden" name="event_id" value={{event.event_id}}>
-                        <h4>開催場所</h4>
-                        <p>・{{event.address}}　{{event.place}}</p>
+                        <h3>{{item.event_name}}</h3>
                     </div>
+                    <div class="container">
+                        <h4>開催日</h4>
+                        <p>・{{item.started_at}}</p>
+                        <h4>リマインドのタイミング</h4>
+                        <p>・{{item.notice_date}}日前</p>
+                        <input type="hidden" name="del_id" value={{item.id}}>
+                    </div>
+                    <div class="centering"><button type="submit" class="button">このリマインドを解除する</button></div>
                 </div>
-
-                <div class="centering">
-                    <p　class="centering">リマインドするタイミング</p>
-                    <select name="notice_date" id="day_select">
-                        <option value="1">1日前</option>
-                        <option value="3">3日前</option>
-                        <option value="5">5日前</option>
-                    </select>
-                </div>
-                <div class="centering">
-                    <button type="submit" class="success button">設定する</button><br>
-                    <a href="/search/user?nickname={{nickname}}" class="button">イベント一覧に戻る</a>
-                </div>
-            </div>
-        </form>
+            </form>
+            {% endfor %}
+            <p class="centering">  
+                <a href="/search/user?nickname={{nickname}}"class="button">イベント一覧へ戻る</a>
+            </p>
+        {% else %}
+        <p class="centering">リマインドしているイベントはありません。</p>
+        <div class="centering">
+            <a href="/search" class="button">検索画面へ戻る</a>
+        </div>
+        {% endif %}
     </div>
 </body>
 </html>

@@ -134,8 +134,8 @@ class database{
                 $stmt->execute();
             }
         }
-        return true;
         $this->closePDO();
+        return true;
     }
 
 
@@ -200,9 +200,9 @@ class database{
             }
         }
         $stmt->execute();
-
-        return true;
+        
         $this->closePDO();
+        return true;
     }
 
     public function delete($table,$target){
@@ -227,7 +227,7 @@ class database{
        
         $stmt->execute();
 
-        return true;
         $pdo = $this->closePDO();
+        return true;
     }
 } 

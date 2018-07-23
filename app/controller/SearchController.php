@@ -13,7 +13,7 @@
             $this->dotenv = new Dotenv\Dotenv('/Applications/XAMPP/xamppfiles/htdocs/event-notification/');
             $this->dotenv->load();
 
-            //$this->pdo = new database();
+            $this->pdo = new database();
         }
 
         // 検索画面TOPの表示
@@ -33,7 +33,23 @@
                 exit();
             }
 
-            echo $this->twig->render('search_connpass.html');
+            $access_token = $_SESSION['access_token'];
+            try{
+                //OAuthトークンとシークレットも使って TwitterOAuth をインスタンス化
+                $connection = new TwitterOAuth($_ENV['TWITTER_API_KEY'], $_ENV['TWITTER_API_SECRET'], $access_token['oauth_token'], $access_token['oauth_token_secret']);
+                $user = $connection->get("account/verify_credentials");
+            }catch(Exception $e){
+                $_SESSION['err'] = '認証に失敗しました。';
+                header('Location: /error');
+                exit();
+            }
+
+            $_SESSION['user'] = $user;
+            $data = [
+                'user' => $user->screen_name
+            ];
+
+            echo $this->twig->render('search_connpass.html',$data);
             exit();
         }
         
@@ -72,19 +88,29 @@
             //現在の1日前の日時を取得
             $today = date('Y-m-d\TH:i:sP', strtotime("+ 1 day"));
             $events = [];
+            $cnt_events = 0;
+            $index = 1;
+            $offset = 1;
+            if(isset($_GET['page'])){
+                $index = $_GET['page'];
+                $offset = (10 * $index) - 10;
+            }
+            $number_of_pages = 0;
 
             //Twitter APIから、ユーザー情報を取得
             $user = $connection->get("account/verify_credentials");
             $_SESSION['screen_name'] = $user->screen_name;
             $_SESSION['id'] = $user->id;
+            $_SESSION['image_url'] = $user->profile_image_url;
 
             //file_get_contents用のユーザーエージェント
             $ua = $_SERVER['HTTP_USER_AGENT'];
             $nickname = $_GET['nickname'];
+            $_SESSION['nickname'] = $nickname;
             
             //Connpass APIのエンドポイント
             $baseUrl = 'https://connpass.com';
-            $url = $baseUrl.'/api/v1/event/?nickname='.$nickname;
+            $url = $baseUrl."/api/v1/event/?nickname={$nickname}&start={$offset}&count=10";
 
             //file_get_contentsのオプション
             $options = [
@@ -105,37 +131,107 @@
                 }
                 $events[] = $event;
             }
+
+            $cnt_events = count($events);
+            $number_of_pages = ceil($cnt_events / 10);
     
             //テンプレートに渡すデータ
             $data = [];
             $data = [
-                'test' => 'yamaymaa',
                 'count' => $tmp_events['results_returned'],
                 'events' => $events,
+                'nickname' => $nickname,
+                'nop' => $number_of_pages,
+                'user' => $user->screen_name
             ];
 
             echo $this->twig->render('search_result.html', $data);
             die();
         }
 
-        // public function getAllmyNotice(){
-        //     //セッションからアクセストークンを取得
-        //     $access_token = $_SESSION['access_token'];
+        public function getAllmyNotice(){
 
-        //     try{
-        //         //OAuthトークンとシークレットも使って TwitterOAuth をインスタンス化
-        //         $connection = new TwitterOAuth($_ENV['TWITTER_API_KEY'], $_ENV['TWITTER_API_SECRET'], $access_token['oauth_token'], $access_token['oauth_token_secret']);
-        //     }catch(Exception $e){
-        //         $_SESSION['err'] = '認証に失敗しました。';
-        //         header('Location: /error');
-        //         exit();
-        //     }
+            session_start();
+            //セッションからアクセストークンを取得
+            $access_token = $_SESSION['access_token'];
+            $nickname = '';
+            if(isset($_SESSION['nickname'])){
+                $nickname = $_SESSION['nickname'];
+            }
+            $user = $_SESSION['user'];
 
-        //     //Twitter APIから、ユーザー情報を取得
-        //     $user = $connection->get("account/verify_credentials");
+            try{
+                //OAuthトークンとシークレットも使って TwitterOAuth をインスタンス化
+                $connection = new TwitterOAuth($_ENV['TWITTER_API_KEY'], $_ENV['TWITTER_API_SECRET'], $access_token['oauth_token'], $access_token['oauth_token_secret']);
+            }catch(Exception $e){
+                $_SESSION['err'] = '認証に失敗しました。';
+                header('Location: /error');
+                exit();
+            }
 
-        //     $query = "select * from reminder where screen_name = {$user->screen_name} ;";
-        //     $res = $this->pdo->select();
-        // }
+            //Twitter APIから、ユーザー情報を取得
+            $user = $connection->get("account/verify_credentials");
+
+            $query = "select * from reminder where screen_name = \"{$user->screen_name}\" and end = 0;";
+            $res = $this->pdo->select($query);
+            for($i = 0;$i < count($res);$i++){
+                $time = new DateTime('@'.$res[$i]['date']);
+                $time->setTimezone(new DateTimeZone('Asia/Tokyo'));
+                $date_tokyo_str = $time->format('Y-m-d H:i:s');
+                $res[$i]['started_at'] = $date_tokyo_str;
+            }
+
+            $data = [
+                'notice' => $res,
+                'nickname' => $nickname,
+                'user' => $user->screen_name
+            ];
+
+            echo $this->twig->render('all_notice.html', $data);
+            die();
+        }
+
+        public function delMyNotice(){
+
+            session_start();
+            //セッションからアクセストークンを取得
+            $access_token = $_SESSION['access_token'];
+            $nickname = $_SESSION['nickname'];
+            $user = $_SESSION['user'];
+
+            $del = $_POST['del_id'];
+            $this->pdo->update('reminder',['end'],[1],['id' => $del]);
+
+            try{
+                //OAuthトークンとシークレットも使って TwitterOAuth をインスタンス化
+                $connection = new TwitterOAuth($_ENV['TWITTER_API_KEY'], $_ENV['TWITTER_API_SECRET'], $access_token['oauth_token'], $access_token['oauth_token_secret']);
+            }catch(Exception $e){
+                $_SESSION['err'] = '認証に失敗しました。';
+                header('Location: /error');
+                exit();
+            }
+
+            //Twitter APIから、ユーザー情報を取得
+            $user = $connection->get("account/verify_credentials");
+
+            $query = "select * from reminder where screen_name = \"{$user->screen_name}\" and end = 0;";
+            $res = $this->pdo->select($query);
+
+            for($i = 0;$i < count($res);$i++){
+                $time = new DateTime('@'.$res[$i]['date']);
+                $time->setTimezone(new DateTimeZone('Asia/Tokyo'));
+                $date_tokyo_str = $time->format('Y-m-d H:i:s');
+                $res[$i]['started_at'] = $date_tokyo_str;
+            }
+
+            $data = [
+                "notice" => $res,
+                'nickname' => $nickname,
+                'user' => $user->screen_name
+            ];
+
+            echo $this->twig->render('all_notice.html', $data);
+            die();
+        }
     }
         

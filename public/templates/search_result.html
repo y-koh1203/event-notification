@@ -20,18 +20,65 @@
     .centering{
         text-align: center;
     }
+    
+    .card p{
+        font-size: 1.1em;
+    }
+
+    .card h4{
+        font-size: 1.3em;
+        font-weight: bold;
+    }
+
+    .container{
+        margin-left: 2%;
+        margin-top: 1%;
+    }
+
+    #search_wrap{
+        margin: 1vh auto 0 auto;
+    }
+
+    #search_bar{
+        width: 40%;
+    }
+
+    .centering{
+        text-align: center;
+    }
+
+    .box_centering{
+        margin: 0 auto;
+    }
+
+    #button_wrap{
+        margin-top:1%;
+    }
 </style>
 <body>
     <div class="top-bar">
         <div class="top-bar-left">
             <ul class="dropdown menu" data-dropdown-menu>
-            <li class="menu-text">Connpass Event Reminder</li>
+                <li class="menu-text"><a href="/search">Connpass Event Reminder</a></li>
             </ul>
         </div>
         <div class="top-bar-right">
-
+            <ul class="dropdown menu" data-dropdown-menu>
+                <li class="menu-text"><a href="/search/all_notice?user={{user}}">{{user}}</a></li>
+            </ul>
         </div>
     </div>
+
+    <form action="/search/user" method="get">
+        <div id="search_wrap">
+            <p class="centering">ニックネームを入力して検索</p>
+            <div class="centering"><input type="text" name="nickname" id="search_bar" class="box_centering"></div>
+        </div>
+       
+        <div class="centering" id="button_wrap">
+            <button type="submit" class="button">検索</button>
+        </div>     
+    </form>
 
     <div id="wrap">    
         {% if events | length > 0 %}
@@ -41,17 +88,32 @@
                     <div class="card-divider">
                         <h3>{{event.title}}</h3>
                     </div>  
-                    <p>{{event.event_url}}</p>
-                    <p>{{event.owner_nickname}}</p>
-                    <p>{{event.started_at}}</p>
-                    <input type="hidden" name="event_id" value={{event.event_id}}>
-                    <p>{{event.address}}　{{event.place}}</p>
+
+                    <div class="container">
+                        <h4>イベントオーナー</h4>
+                        <p>・{{event.owner_nickname}}</p>
+                        <h4>イベントURL</h4>
+                        <p>・<a href="{{event.event_url}}">{{event.event_url}}</a></p>
+                        <h4>開催日</h4>
+                        <p>・{{event.started_at}}</p>
+                        <input type="hidden" name="event_id" value={{event.event_id}}>
+                        <h4>開催場所</h4>
+                        <p>・{{event.address}}　{{event.place}}</p>
+                    </div>
                     <div class="centering"><button type="submit" class="button">このイベントをリマインドする</button></div>
                 </div>
             </form>
             {% endfor %}
+            <div>
+                {% for i in '0'..'{{nop}}' if i != 0 %}
+                    <a href='/search/user?nickname={{nickname}}&amp;page={{i}}'>{{i}}</a>
+                {% endfor %}
+            </div>
         {% else %}
-        <p>参加予定のイベントはありません。</p>
+        <p class="centering">参加予定のイベントはありません。</p>
+        <div class="centering">
+            <a href="/search" class="button">検索画面へ戻る</a>
+        </div>
         {% endif %}
     </div>
 </body>

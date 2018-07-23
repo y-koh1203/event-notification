@@ -24,6 +24,8 @@
             $r->addRoute('GET', '/twitter/callback', 'callback');
             $r->addRoute('GET', '/search', 'search_index');
             $r->addRoute('GET', '/search/user', 'search_user');
+            $r->addRoute('GET', '/search/all_notice', 'search_all_notice');
+            $r->addRoute('POST', '/search/del_notice', 'search_del_notice');
             $r->addRoute('GET', '/detail', 'detail');
             $r->addRoute('POST', '/detail/set_notice', 'set_notice');
             $r->addRoute('GET', '/error', 'error');
@@ -91,20 +93,36 @@
             case "callback":
                 $oauth_index = new OauthController;
                 $oauth_index->twiiterCallback();
+                break;
             case "search_index":
                 $search_index = new SearchController;
                 $search_index->returnSearchIndex();
+                break;
             case "search_user":
                 $search_index = new SearchController;
                 $search_index->getConnpassUser();
+                break;
+            case "search_all_notice":
+                $search_index = new SearchController;
+                $search_index->getAllmyNotice();
+                break;
+            case "search_del_notice":
+                $search_index = new SearchController;
+                $search_index->delMyNotice();
+                break;
             case "detail":
                 $detail_index = new DetailController;
                 $detail_index->detailIndex();
+                break;
             case "set_notice":
                 $detail_index = new DetailController;
                 $detail_index->setNotice();
+                break;
             case "error":
                 $error_index = new UtilController();
                 $error_index->error();
+                break;
+            default:
+                break;
         }
     }
